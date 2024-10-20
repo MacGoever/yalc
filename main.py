@@ -17,9 +17,7 @@ from ota import OTAUpdater
 
 firmware_url = "https://github.com/MacGoever/yalc/refs/heads/"
 
-ota_updater = OTAUpdater(SSID, PASSWORD, firmware_url, "main.py")
-ota_updater.download_and_install_update_if_available()
-ota_updater = OTAUpdater(SSID, PASSWORD, firmware_url, "helper.py")
+ota_updater = OTAUpdater(SSID, PASSWORD, firmware_url, "main.py", "helper.py")
 ota_updater.download_and_install_update_if_available()
 
 
