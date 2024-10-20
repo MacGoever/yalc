@@ -15,7 +15,7 @@ import helper
 from WIFI_CONFIG import SSID, PASSWORD
 from ota import OTAUpdater
 
-firmware_url = "https://raw.githubusercontent.com/MacGoever/yalc/blob"
+firmware_url = "https://raw.githubusercontent.com/MacGoever/yalc/blobi/"
 
 ota_updater = OTAUpdater(SSID, PASSWORD, firmware_url, "main.py")
 ota_updater = OTAUpdater(SSID, PASSWORD, firmware_url, "helper.py")
