@@ -15,28 +15,46 @@ import helper
 from WIFI_CONFIG import SSID, PASSWORD
 from ota import OTAUpdater
 
-firmware_url = "https://github.com/MacGoever/yalc/refs/heads/"
 
-ota_updater = OTAUpdater(SSID, PASSWORD, firmware_url, "main.py")
+color = (0,0,200)
+bgcolor = (0,0,0)
+red = (255,0,0)
+green = (0,255,0)
+blue = (0,255,0)
+white = (255,255,255)
+
+# display test
+pin_np = 0
+leds = 74
+delay_normal = 10
+
+np = NeoPixel(Pin(pin_np, Pin.OUT), leds)
+np.fill(red)
+np.write()
+sleep_ms(500)
+
+np.fill(green)
+np.write()
+sleep_ms(500)
+
+np.fill(blue)
+np.write()
+sleep_ms(500)
+
+#get time and Wifi
+helper.getWifi()
+
+firmware_url = "https://github.com/MacGoever/yalc/refs/heads/main/"
+ota_updater = OTAUpdater(firmware_url, "main.py", "helper.py")
 ota_updater.download_and_install_update_if_available()
-
-
-helper.getTime()
 
 
 
 cookooDone = False
 tempint = 0
 
-
-
 currentDisplay = [ [(0,0,0)]*7 for i in range(19)]
 plannedDisplay = [ [(0,0,0)]*7 for i in range(19)]
-
-color = (0,0,200)
-bgcolor = (0,0,0)
-red = (255,0,0)
-green = (0,255,0)
 
 
 upperDot = green
@@ -44,36 +62,6 @@ lowerDot = red
 dotDelay = 1000
 dotCount = 0
 
-
-
-
-# Neopixel WS2812
-pin_np = 0
-
-leds = 74
-
-delay_normal = 10
-
-
-
-
-
-# Initialisierung WS2812/NeoPixel
-np = NeoPixel(Pin(pin_np, Pin.OUT), leds)
-np.fill((255,0,0))
-np.write()
-sleep_ms(500)
-
-np.fill((0,255,0))
-np.write()
-sleep_ms(500)
-
-np.fill((0,0,255))
-np.write()
-sleep_ms(500)
-
-np.fill((0,0,0))
-np.write()
 
 def getPixel(x,y):
     ledIndex = helper.pixelmap[x][y]
@@ -99,10 +87,7 @@ def fadeTo(fromMatrix, toMatrix, step):
                 else:
                     outTupel[colorRGB] = toTupel[colorRGB]
             outMatrix[x][y] = tuple(outTupel)
-    
     return outMatrix
-
-
 
 def doAnimation (step):
     for i in range (0,19):
@@ -114,12 +99,7 @@ def doAnimation (step):
             newColor = (int(color[0] * colorFactor), int(color[1] * colorFactor), int(color[2] * colorFactor))
             setPixel(i,j,newColor)
 
-
-
-
-
-
-def cookoo2():
+def cookoo5():
     time = machine.RTC().datetime()
     hours = time[4] % 10
     hoursPoTen = time[4] // 10
@@ -151,37 +131,80 @@ def cookoo2():
             
             sleep_ms(delay_normal)
 
-                
-    
+def cookoo2(plannedDisplay, color, bgcoler):
 
-def cookoo1():
-
-    for i in range (0,2):
+    for j in range (0,7):
         for i in range (0,19):
-            for j in range (0,7):
+            if getPixel(i,j) != bgcolor:
+                setPixel (i, j, (0,0,255))
+        np.write()
+        sleep_ms(20)       
+
+    for j in range (0,7):
+        for i in range (0,19):
+            if getPixel(i,j) != bgcolor:
+                setPixel (i, j, (0,255,0))
+        np.write()
+        sleep_ms(20)  
+
+    for j in range (0,7):
+        for i in range (0,19):
+            if getPixel(i,j) != bgcolor:
+                setPixel (i, j, (255,0,0))
+        np.write()
+        sleep_ms(20)
+                    
+    for j in range (0,7):
+        for i in range (0,19):
+            if getPixel(i,j) != bgcolor:
+                setPixel (i, j, color)
+        np.write()
+        sleep_ms(10)  
+
+
+
+def cookoo1(plannedDisplay, color, bgcoler):
+
+    for i in range (0,19):
+        for j in range (0,7):
+            if getPixel(i,j) != bgcolor:
                 setPixel (i, j, (0,0,255))
                 np.write()
                 sleep_ms(10)       
 
-        for i in range (0,19):
-            for j in range (0,7):
+    for i in range (0,19):
+        for j in range (0,7):
+            if getPixel(i,j) != bgcolor:
                 setPixel (i, j, (0,255,0))
                 np.write()
                 sleep_ms(10)  
 
-        for i in range (0,19):
-            for j in range (0,7):
+    for i in range (0,19):
+        for j in range (0,7):
+            if getPixel(i,j) != bgcolor:
                 setPixel (i, j, (255,0,0))
+                np.write()
+                sleep_ms(10)
+                    
+    for i in range (0,19):
+        for j in range (0,7):
+            if getPixel(i,j) != bgcolor:
+                setPixel (i, j, color)
                 np.write()
                 sleep_ms(10)  
 
-#cookoos = [cookoo1,cookoo2]
-cookoos = [cookoo1]
+cookoos = [cookoo1,cookoo2]
+#cookoos = [cookoo1]
 
-
-def doCookoo():
+def doCookoo(plannedDisplay, color, bgcoler):
+    cookoos[0](plannedDisplay, color, bgcoler)
     cookoos.append(cookoos.pop(0))
-    cookoos[0]()
+    
+
+ntp_success = False
+ntp_counter = 10
+last_minute = 0
+last_sec = 0
 
 
 while True:
@@ -192,30 +215,39 @@ while True:
     minutes = time[5] % 10
     minutesPoTen = time[5] // 10
     
+    #generate time display
     plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 0 ,hoursPoTen, color, bgcolor)
     plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 1 ,hours, color, bgcolor)
     plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 2 ,minutesPoTen, color, bgcolor)
     plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 3 ,minutes, color, bgcolor)
     plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
        
-    dotCount = dotCount + delay_normal
-    if dotCount >= dotDelay:
-        tempDot = lowerDot
-        lowerDot = upperDot
-        upperDot = tempDot
-        dotCount = 0
+    if time[6] != last_sec:
+        last_sec = time[6]
+        
+        if last_sec % 2 == 0:
+            lowerDot = color
+            upperDot = color
+        else:
+            lowerDot = bgcolor
+            upperDot = bgcolor
+            
+            if time[5] != last_minute:
+                last_minute = time[5]
+		
+		ntp_counteri += -1
+		if not ntp_success:
+		    ntp_success = getTime()
+		    ntp_counter=1440
+		elif ntp_counter == 0:
+                    ntp_success = getTime()
+		    ntp_counter=1440
+
+                doCookoo(plannedDisplay, color, bgcolor)
+            #    if (time[5] in [0,5,30,45]):
+                    
 
     currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
- 
-    if (time[5] == 0 or time[5] == 15 or time[5] == 30 or time[5] == 45 ):
-    #if (time[5] != tempint):
-        if not cookooDone:
-            doCookoo()
-            cookooDone = True
-            #tempint = time[5]
-    else:
-        cookooDone = False
-            
             
     for x in range(0,19):
         for y in range(0,7):
