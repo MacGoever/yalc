@@ -236,7 +236,7 @@ while True:
             if time[5] != last_minute:
                 last_minute = time[5]
 		
-		ntp_counteri += -1
+		ntp_counter += -1
 		if not ntp_success:
 		    ntp_success = getTime()
 		    ntp_counter=1440
