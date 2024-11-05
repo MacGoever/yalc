@@ -1,4 +1,3 @@
-# Bibliotheken laden
 from machine import Pin
 from neopixel import NeoPixel
 from time import sleep_ms
@@ -21,7 +20,37 @@ dawnhours = 6
 duskduration = 30
 dawnduration = 30
 
+def getWifi():
+    # WLAN-Config
+    wlanSSID = SSID
+    wlanPW = PASSWORD
+    
+    # status-LED
+    led_onboard = machine.Pin('LED', machine.Pin.OUT, value=0)
 
+    wlan = network.WLAN(network.STA_IF)
+        
+    print('initiating Wifi...')
+            
+    wlan.active(False)
+    wlan.active(True)
+    print(wlanSSID)
+    wlan.connect(wlanSSID, wlanPW)
+    for i in range(10):    #retry wifi connect 10 times
+        if wlan.status() < 0 or wlan.status() >= 3:
+            break
+        led_onboard.toggle()
+        print('.')
+        time.sleep(1)
+        
+    if wlan.isconnected():
+        print('Wifi connected. Status:', wlan.status())
+        print('Wifi parameters: ', wlan.ifconfig())
+        led_onboard.on()
+    else:
+        print('Wifi connection error. Status: ', wlan.status())
+        led_onboard.off()
+            
 
 def last_sunday(year: int, month: int, hour: int, minute: int) -> int:
         """Get the time of the last sunday of the month
@@ -37,92 +66,59 @@ def last_sunday(year: int, month: int, hour: int, minute: int) -> int:
         # Return the time of the last sunday of the month
         return time.mktime((year, month, mday - offset, hour, minute, second, None, None))
 
-
-
-
-
 def getTime():
-    # WLAN-Konfiguration
-    wlanSSID = SSID
-    wlanPW = PASSWORD
+    wlan = network.WLAN(network.STA_IF)
 
-    
-    # Status-LED
-    led_onboard = machine.Pin('LED', machine.Pin.OUT, value=0)
-
-    # NTP-Host
     NTP_HOST = 'pool.ntp.org'
     
-    wlan = network.WLAN(network.STA_IF)
-        
     NTP_DELTA = 2208988800
     NTP_QUERY = bytearray(48)
     NTP_QUERY[0] = 0x1B
 
     ntp_success = False
     
-    
     local_secs = 0
     
-    if not wlan.isconnected(): 
-		print('initiating Wifi...')
-			
-		wlan.active(True)
-		print(wlanSSID)
-		wlan.connect(wlanSSID, wlanPW)
-		for i in range(10):    #retry wifi connect 10 times
-			if wlan.status() < 0 or wlan.status() >= 3:
-				break
-			led_onboard.toggle()
-			print('.')
-			time.sleep(1)
-		
-		if wlan.isconnected():
-			print('Wifi connected. Status:', wlan.status())
-			print('Wifi parameters: ', wlan.ifconfig())
-			led_onboard.on()
-		else:
-			print('Wifi connection error. Status: ', wlan.status())
-			led_onboard.off()
-			
-		if wlan.isconnected():
-			try:
-				s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-				addr = socket.getaddrinfo(NTP_HOST, 123)[0][-1]
-				s.settimeout(1)
-				res = s.sendto(NTP_QUERY, addr)
-				msg = s.recv(48)
-			except:
-				print("Something went wrong during the NTP query")
-			else:
-				ntp_secs = struct.unpack("!I", msg[40:44])[0]
-				utc_secs =  ntp_secs - NTP_DELTA
-				utc = time.gmtime(utc_secs)
-				print ("NTP says UTC is " + str(utc[3]) + ":" + str(utc[4]) + ":" + str(utc[5]) + " on " + str(utc[2]) + "." + str(utc[1]) + "." + str(utc[0]))                
-			
-			
-				# Find start date for daylight saving, i.e. last Sunday in March (01:00 UTC)
-				start_secs = last_sunday(year=utc[0], month=3, hour=1, minute=0)
+    if not wlan.isconnected():
+        getWifi()
 
-				# Find stop date for daylight saving, i.e. last Sunday in October (01:00 UTC)
-				stop_secs = last_sunday(year=utc[0], month=10, hour=1, minute=0)
+    if wlan.isconnected():
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            addr = socket.getaddrinfo(NTP_HOST, 123)[0][-1]
+            s.settimeout(1)
+            res = s.sendto(NTP_QUERY, addr)
+            msg = s.recv(48)
+        except:
+            print("Something went wrong during the NTP query")
+        else:
+            ntp_secs = struct.unpack("!I", msg[40:44])[0]
+            utc_secs =  ntp_secs - NTP_DELTA
+            utc = time.gmtime(utc_secs)
+            print ("NTP says UTC is " + str(utc[3]) + ":" + str(utc[4]) + ":" + str(utc[5]) + " on " + str(utc[2]) + "." + str(utc[1]) + "." + str(utc[0]))                
+            
+            
+            # Find start date for daylight saving, i.e. last Sunday in March (01:00 UTC)
+            start_secs = last_sunday(year=utc[0], month=3, hour=1, minute=0)
 
-			
-				if utc_secs >= start_secs and utc_secs < stop_secs:
-					delta_secs = 2 * 60 * 60  # (CEST or UTC + 2h)
-					print ("It's CEST!")            
-				else:
-					delta_secs = 1 * 60 * 60  # (CET or UTC + 1h)
-					print ("It's CET!")
+            # Find stop date for daylight saving, i.e. last Sunday in October (01:00 UTC)
+            stop_secs = last_sunday(year=utc[0], month=10, hour=1, minute=0)
 
-				local_secs = utc_secs + delta_secs
-				local_time = time.localtime(local_secs)
-				print ("Local time is " + str(local_time[3]) + ":" + str(local_time[4]) + ":" + str(local_time[5]) + " on " + str(local_time[2]) + "." + str(local_time[1]) + "." + str(local_time[0]))                
-			
-				machine.RTC().datetime((local_time[0], local_time[1], local_time[2], local_time[6], local_time[3], local_time[4], local_time[5], 0))
-				ntp_success = True
-			finally: 
-				s.close()
+            
+            if utc_secs >= start_secs and utc_secs < stop_secs:
+                delta_secs = 2 * 60 * 60  # (CEST or UTC + 2h)
+                print ("It's CEST!")            
+            else:
+                delta_secs = 1 * 60 * 60  # (CET or UTC + 1h)
+                print ("It's CET!")
+
+            local_secs = utc_secs + delta_secs
+            local_time = time.localtime(local_secs)
+            print ("Local time is " + str(local_time[3]) + ":" + str(local_time[4]) + ":" + str(local_time[5]) + " on " + str(local_time[2]) + "." + str(local_time[1]) + "." + str(local_time[0]))
+            machine.RTC().datetime((local_time[0], local_time[1], local_time[2], local_time[6], local_time[3], local_time[4], local_time[5], 0))
+            ntp_success = True
+        finally: 
+            s.close()
 
     return ntp_success
              
