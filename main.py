@@ -140,7 +140,7 @@ def cookoo2(plannedDisplay, ocolor, bgcoler):
             for j in range (0,7):
 	        for i in range (0,19):
 	            if getPixel(i,j) != bgcolor:
-		        setPixel (i, j, (0,0,255))
+		        setPixel (i, j, color)
 		    np.write()
 		    sleep_ms(20)       
 
