@@ -20,7 +20,7 @@ color = (0,0,200)
 bgcolor = (0,0,0)
 red = (255,0,0)
 green = (0,255,0)
-blue = (0,255,0)
+blue = (0,0,255)
 white = (255,255,255)
 
 # display test
@@ -41,14 +41,15 @@ np.fill(blue)
 np.write()
 sleep_ms(500)
 
+np.fill(bgcolor)
+np.write()
+
 #get time and Wifi
 helper.getWifi()
 
 firmware_url = "https://github.com/MacGoever/yalc/refs/heads/main/"
 ota_updater = OTAUpdater(firmware_url, "main.py", "helper.py")
 ota_updater.download_and_install_update_if_available()
-
-
 
 cookooDone = False
 tempint = 0
