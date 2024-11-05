@@ -135,7 +135,7 @@ def cookoo5():
 #color from bottom to top
 def cookoo2(plannedDisplay, ocolor, bgcoler):
     colors = [(0,0,255),(0,255,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
-    for k in range (0,20):
+    for k in range (0,10):
         for color in colors:
             for j in range (0,7):
 	        for i in range (0,19):
@@ -147,41 +147,30 @@ def cookoo2(plannedDisplay, ocolor, bgcoler):
     for j in range (0,7):
         for i in range (0,19):
             if getPixel(i,j) != bgcolor:
-                setPixel (i, j, color)
+                setPixel (i, j, ocolor)
         np.write()
         sleep_ms(10)  
 
 
 #color from left to right
-def cookoo1(plannedDisplay, color, bgcoler):
+def cookoo1(plannedDisplay, ocolor, bgcoler):
+    colors = [(0,0,255),(0,255,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
 
-    for i in range (0,19):
-        for j in range (0,7):
-            if getPixel(i,j) != bgcolor:
-                setPixel (i, j, (0,0,255))
-                np.write()
-                sleep_ms(10)       
-
-    for i in range (0,19):
-        for j in range (0,7):
-            if getPixel(i,j) != bgcolor:
-                setPixel (i, j, (0,255,0))
-                np.write()
-                sleep_ms(10)  
-
-    for i in range (0,19):
-        for j in range (0,7):
-            if getPixel(i,j) != bgcolor:
-                setPixel (i, j, (255,0,0))
+    for k in range (0,10):
+        for color in colors:
+            for i in range (0,19):
+                for j in range (0,7):
+                    if getPixel(i,j) != bgcolor:
+                        setPixel (i, j, color)
                 np.write()
                 sleep_ms(10)
                     
     for i in range (0,19):
         for j in range (0,7):
             if getPixel(i,j) != bgcolor:
-                setPixel (i, j, color)
-                np.write()
-                sleep_ms(10)  
+                setPixel (i, j, ocolor)
+            np.write()
+            sleep_ms(10)  
 
 cookoos = [cookoo1,cookoo2]
 #cookoos = [cookoo1]
