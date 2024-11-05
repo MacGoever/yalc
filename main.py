@@ -238,10 +238,10 @@ while True:
 		
 		ntp_counter += -1
 		if not ntp_success:
-		    ntp_success = getTime()
+		    ntp_success = helper.getTime()
 		    ntp_counter=1440
 		elif ntp_counter == 0:
-                    ntp_success = getTime()
+                    ntp_success = helper.getTime()
 		    ntp_counter=1440
 
                 doCookoo(plannedDisplay, color, bgcolor)
