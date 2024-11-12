@@ -136,7 +136,7 @@ def cookoo5():
 def cookoo3(plannedDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
 
-    for k in range (0,5):
+    for k in range (0,15):
 	color = colors[0]
 	colors.append(colors.pop(0))
         for i in range (0,4):
@@ -151,7 +151,13 @@ def cookoo3(plannedDisplay, ocolor, bgcoler):
                     setPixel (i, j, color)
 	color = colors[0]
 	colors.append(colors.pop(0))
-        for i in range (10,14):
+        for i in range (10,10):
+            for j in range (0,7):
+                if getPixel(i,j) != bgcolor:
+                    setPixel (i, j, color)
+	color = colors[0]
+	colors.append(colors.pop(0))
+        for i in range (11,15):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
@@ -162,7 +168,7 @@ def cookoo3(plannedDisplay, ocolor, bgcoler):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
         np.write()
-        sleep_ms(50)
+        sleep_ms(300)
                     
     for i in range (0,19):
         for j in range (0,7):
