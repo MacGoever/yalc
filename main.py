@@ -132,10 +132,48 @@ def cookoo5():
             
             sleep_ms(delay_normal)
 
+#color flip numners
+def cookoo3(plannedDisplay, ocolor, bgcoler):
+    colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
+
+    for k in range (0,5):
+	color = colors[0]
+	colors.append(colors.pop(0))
+        for i in range (0,4):
+            for j in range (0,7):
+                if getPixel(i,j) != bgcolor:
+                    setPixel (i, j, color)
+	color = colors[0]
+	colors.append(colors.pop(0))
+        for i in range (5,9):
+            for j in range (0,7):
+                if getPixel(i,j) != bgcolor:
+                    setPixel (i, j, color)
+	color = colors[0]
+	colors.append(colors.pop(0))
+        for i in range (10,14):
+            for j in range (0,7):
+                if getPixel(i,j) != bgcolor:
+                    setPixel (i, j, color)
+	color = colors[0]
+	colors.append(colors.pop(0))
+        for i in range (15,19):
+            for j in range (0,7):
+                if getPixel(i,j) != bgcolor:
+                    setPixel (i, j, color)
+        np.write()
+        sleep_ms(50)
+                    
+    for i in range (0,19):
+        for j in range (0,7):
+            if getPixel(i,j) != bgcolor:
+                setPixel (i, j, ocolor)
+    np.write()
+
 #color from bottom to top
 def cookoo2(plannedDisplay, ocolor, bgcoler):
-    colors = [(0,0,255),(0,255,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
-    for k in range (0,10):
+    colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
+    for k in range (0,5):
         for color in colors:
             for j in range (0,7):
 	        for i in range (0,19):
@@ -154,9 +192,9 @@ def cookoo2(plannedDisplay, ocolor, bgcoler):
 
 #color from left to right
 def cookoo1(plannedDisplay, ocolor, bgcoler):
-    colors = [(0,0,255),(0,255,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
+    colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
 
-    for k in range (0,10):
+    for k in range (0,5):
         for color in colors:
             for i in range (0,19):
                 for j in range (0,7):
@@ -172,7 +210,7 @@ def cookoo1(plannedDisplay, ocolor, bgcoler):
             np.write()
             sleep_ms(10)  
 
-cookoos = [cookoo1,cookoo2]
+cookoos = [cookoo1,cookoo2,cookoo3]
 #cookoos = [cookoo1]
 
 def doCookoo(plannedDisplay, color, bgcoler):
