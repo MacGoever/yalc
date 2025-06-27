@@ -27,7 +27,7 @@ def getWifi():
     
     # status-LED
     led_onboard = machine.Pin('LED', machine.Pin.OUT, value=0)
-
+    led_onboard.on()
     wlan = network.WLAN(network.STA_IF)
         
     print('initiating Wifi...')
@@ -46,10 +46,11 @@ def getWifi():
     if wlan.isconnected():
         print('Wifi connected. Status:', wlan.status())
         print('Wifi parameters: ', wlan.ifconfig())
-        led_onboard.on()
+        led_onboard.off()
+        
     else:
         print('Wifi connection error. Status: ', wlan.status())
-        led_onboard.off()
+        
             
 
 def last_sunday(year: int, month: int, hour: int, minute: int) -> int:

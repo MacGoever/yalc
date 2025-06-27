@@ -90,15 +90,9 @@ def fadeTo(fromMatrix, toMatrix, step):
             outMatrix[x][y] = tuple(outTupel)
     return outMatrix
 
-def doAnimation (step):
-    for i in range (0,19):
-        colorFactor =  step
-        #print(colorFactor)
-        #colorFactor = math.sin(1/3*i+2*math.pi*step)+1
-        for j in range (0,7):
-            color = getColor(i,j)
-            newColor = (int(color[0] * colorFactor), int(color[1] * colorFactor), int(color[2] * colorFactor))
-            setPixel(i,j,newColor)
+##################################################
+#Cookoos
+##################################################
 
 def cookoo5():
     time = machine.RTC().datetime()
@@ -137,32 +131,32 @@ def cookoo3(plannedDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
 
     for k in range (0,15):
-	color = colors[0]
-	colors.append(colors.pop(0))
+        color = colors[0]
+        colors.append(colors.pop(0))
         for i in range (0,4):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
-	color = colors[0]
-	colors.append(colors.pop(0))
+        color = colors[0]
+        colors.append(colors.pop(0))
         for i in range (5,9):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
-	color = colors[0]
-	colors.append(colors.pop(0))
+        color = colors[0]
+        colors.append(colors.pop(0))
         for i in range (10,10):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
-	color = colors[0]
-	colors.append(colors.pop(0))
+        color = colors[0]
+        colors.append(colors.pop(0))
         for i in range (11,15):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
-	color = colors[0]
-	colors.append(colors.pop(0))
+        color = colors[0]
+        colors.append(colors.pop(0))
         for i in range (15,19):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
@@ -182,11 +176,11 @@ def cookoo2(plannedDisplay, ocolor, bgcoler):
     for k in range (0,5):
         for color in colors:
             for j in range (0,7):
-	        for i in range (0,19):
-	            if getPixel(i,j) != bgcolor:
-		        setPixel (i, j, color)
-		np.write()
-		sleep_ms(20)       
+                for i in range (0,19):
+                    if getPixel(i,j) != bgcolor:
+                        setPixel (i, j, color)
+        np.write()
+        sleep_ms(20)       
 
     for j in range (0,7):
         for i in range (0,19):
@@ -214,15 +208,17 @@ def cookoo1(plannedDisplay, ocolor, bgcoler):
             if getPixel(i,j) != bgcolor:
                 setPixel (i, j, ocolor)
             np.write()
-            sleep_ms(10)  
-
+            sleep_ms(10)
+            
 cookoos = [cookoo1,cookoo2,cookoo3]
-#cookoos = [cookoo1]
 
 def doCookoo(plannedDisplay, color, bgcoler):
     cookoos[0](plannedDisplay, color, bgcoler)
     cookoos.append(cookoos.pop(0))
     
+##################################################
+#Cookoos Ende
+##################################################
 
 ntp_success = False
 ntp_counter = 10
@@ -255,19 +251,22 @@ while True:
             lowerDot = bgcolor
             upperDot = bgcolor
             
-            if time[5] != last_minute:
-                last_minute = time[5]
-		
-		ntp_counter += -1
-		if not ntp_success:
-		    ntp_success = helper.getTime()
-		    ntp_counter=1440
-		elif ntp_counter == 0:
-                    ntp_success = helper.getTime()
-		    ntp_counter=1440
+    if time[5] != last_minute:
+        last_minute = time[5]
 
-                doCookoo(plannedDisplay, color, bgcolor)
-            #    if (time[5] in [0,5,30,45]):
+        ntp_counter += -1
+        if not ntp_success:
+            ntp_success = helper.getTime()
+            ntp_counter=42
+        elif ntp_counter == 0:
+            ntp_success = helper.getTime()
+            ntp_counter=42
+
+    #if (time[5] in [0,5,30,45]):
+        try:
+            doCookoo(plannedDisplay, color, bgcolor)
+        except:
+            print("You messed up during cookoo")
                     
 
     currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
