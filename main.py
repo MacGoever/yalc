@@ -234,6 +234,14 @@ while True:
     minutes = time[5] % 10
     minutesPoTen = time[5] // 10
     
+    #choose color depending on daytime
+    if time[4] > 18 or time[4] < 5:
+        color=(200,0,0)
+    if time[4] > 5 and time[4] < 10:
+        color=(0,0,255)
+    if time[4] > 10 and time[4] < 18:
+        color=(0,255,0)    
+    
     #generate time display
     plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 0 ,hoursPoTen, color, bgcolor)
     plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 1 ,hours, color, bgcolor)
