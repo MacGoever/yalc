@@ -73,22 +73,25 @@ def setPixel (x,y,color):
     if npIndex != -1:
         np[npIndex] = color
 
-def fadeTo(fromMatrix, toMatrix, step):
+def fadeTo(toMatrix, step):
     outMatrix = [ [(0,0,0)]*7 for i in range(19)]
+    fadeDone=True
     for x in range(0,19):
         outTupel = [0,0,0]
         for y in range(0,7):
-            fromTupel = fromMatrix[x][y]
+            fromTupel = getPixel(x,y)
             toTupel = toMatrix[x][y]
             for colorRGB in range(0,3):
                 if ((fromTupel[colorRGB] + step) < toTupel[colorRGB]):
                     outTupel[colorRGB] = fromTupel[colorRGB] + step
+                    fadeDone=False
                 elif ((fromTupel[colorRGB] - step) > toTupel[colorRGB]):
                     outTupel[colorRGB] = fromTupel[colorRGB] - step
+                    fadeDone=False
                 else:
                     outTupel[colorRGB] = toTupel[colorRGB]
-            outMatrix[x][y] = tuple(outTupel)
-    return outMatrix
+            setPixel(x,y,outTupel)
+    return fadeDone
 
 def putMatrix(fromMatrix):
     for x in range(0,19):
@@ -116,7 +119,7 @@ def cookoo5(plannedDisplay, ocolor, bgcoler):
         plannedDisplay = helper.setColonInMatrix(plannedDisplay, cookoo2Color, cookoo2Color)
             
         for j in range(255 / 20):       
-            currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
+            #currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
                      
             for x in range(0,19):
                 for y in range(0,7):
@@ -277,21 +280,18 @@ while True:
 
     #if time[6] == 0 and time[5] in [0,5,30,45]:
     if time[6] == 0 and True:
+        lowerDot = color
+        upperDot = color
+        plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
+        fadeTo( plannedDisplay, 256)
+
         try:
-            lowerDot = color
-            upperDot = color
-            plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
             doCookoo(plannedDisplay, color, bgcolor)
         except:
             print("You messed up during cookoo")
 
-        currentDisplay = fadeTo(currentDisplay, plannedDisplay, 255)
-
-    else:
-        currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
+    fadeTo( plannedDisplay, 20)
         
-    putMatrix(currentDisplay)
-
     np.write()
     
     sleep_ms(delay_normal)
