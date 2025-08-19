@@ -192,12 +192,7 @@ def cookoo1(plannedDisplay, ocolor, bgcoler):
                 np.write()
                 sleep_ms(10)
                     
-    for i in range (0,19):
-        for j in range (0,7):
-            if getPixel(i,j) != bgcolor:
-                setPixel (i, j, ocolor)
-            np.write()
-        sleep_ms(10)
+
         
 #escaping digits
 def cookoo4(plannedDisplay, ocolor, bgcoler):
