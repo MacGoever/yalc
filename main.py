@@ -167,12 +167,6 @@ def cookoo3(plannedDisplay, ocolor, bgcoler):
         np.write()
         sleep_ms(300)
                     
- #   for i in range (0,19):
- #       for j in range (0,7):
- #           if getPixel(i,j) != bgcolor:
- #               setPixel (i, j, ocolor)
- #   np.write()
-
 #color from bottom to top
 def cookoo2(plannedDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0),(255,255,255),ocolor]
@@ -182,16 +176,8 @@ def cookoo2(plannedDisplay, ocolor, bgcoler):
                 for i in range (0,19):
                     if getPixel(i,j) != bgcolor:
                         setPixel (i, j, color)
-            np.write()
-            sleep_ms(20)       
-
-  #  for j in range (0,7):
-  #      for i in range (0,19):
-  #          if getPixel(i,j) != bgcolor:
-  #              setPixel (i, j, ocolor)
-  #      np.write()
-  #      sleep_ms(20)  
-
+                np.write()
+                sleep_ms(20)       
 
 #color from left to right
 def cookoo1(plannedDisplay, ocolor, bgcoler):
