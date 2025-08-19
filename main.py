@@ -90,16 +90,16 @@ def fadeTo(fromMatrix, toMatrix, step):
             outMatrix[x][y] = tuple(outTupel)
     return outMatrix
 
+def putMatrix(fromMatrix):
+    for x in range(0,19):
+        for y in range(0,7):
+            setPixel(x,y,fromMatrix[x][y]) 
+
 ##################################################
 #Cookoos
 ##################################################
-
-def cookoo5():
-    time = machine.RTC().datetime()
-    hours = time[4] % 10
-    hoursPoTen = time[4] // 10
-    minutes = time[5] % 10
-    minutesPoTen = time[5] // 10
+#color fade digits
+def cookoo5(plannedDisplay, ocolor, bgcoler):
     
     colors=[(255,0,0),(255,255,0),(255,255,255),(255,255,0),(0,255,0),(0,0,255),(0,255,255),(255,0,0),(255,255,0),(255,255,255),(255,255,0),(0,255,0),(0,0,255),(255,0,0),(255,255,0),(255,255,255),(255,255,0),(0,255,0),(0,0,255),(0,255,255)]
     
@@ -126,45 +126,45 @@ def cookoo5():
             
             sleep_ms(delay_normal)
 
-#color flip numners
+#color flip numbers
 def cookoo3(plannedDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
 
     for k in range (0,15):
         color = colors[0]
         colors.append(colors.pop(0))
-        for i in range (0,3):
+        for i in range (0,5):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
-        for i in range (4,7):
+        for i in range (4,9):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
-        for i in range (9,9):
+        for i in range (9,11):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
-        for i in range (11,14):
+        for i in range (11,16):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
-        for i in range (15,18):
+        for i in range (15,19):
             for j in range (0,7):
                 if getPixel(i,j) != bgcolor:
                     setPixel (i, j, color)
         np.write()
         sleep_ms(300)
                     
-    for i in range (0,18):
+    for i in range (0,19):
         for j in range (0,7):
             if getPixel(i,j) != bgcolor:
                 setPixel (i, j, ocolor)
@@ -208,7 +208,12 @@ def cookoo1(plannedDisplay, ocolor, bgcoler):
             if getPixel(i,j) != bgcolor:
                 setPixel (i, j, ocolor)
             np.write()
-            sleep_ms(10)
+        sleep_ms(10)
+        
+#escaping digits
+def cookoo4(plannedDisplay, ocolor, bgcoler):
+    print("Test")
+    
             
 cookoos = [cookoo1,cookoo2,cookoo3]
 
@@ -270,18 +275,22 @@ while True:
             ntp_success = helper.getTime()
             ntp_counter=42
 
-    #if (time[5] in [0,5,30,45]):
+    #if time[6] == 0 and time[5] in [0,5,30,45]:
+    if time[6] == 0 and True:
         try:
+            lowerDot = color
+            upperDot = color
+            plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
             doCookoo(plannedDisplay, color, bgcolor)
         except:
             print("You messed up during cookoo")
-                    
 
-    currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
-            
-    for x in range(0,19):
-        for y in range(0,7):
-            setPixel(x,y,currentDisplay[x][y])
+        currentDisplay = fadeTo(currentDisplay, plannedDisplay, 255)
+
+    else:
+        currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
+        
+    putMatrix(currentDisplay)
 
     np.write()
     
