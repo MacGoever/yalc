@@ -73,7 +73,40 @@ def setPixel (x,y,color):
     if npIndex != -1:
         np[npIndex] = color
 
-def fadeTo(toMatrix, step):
+def fadeTo(toMatrix, duration):
+    stepDuration_us = duration / 256 * 1000
+    diffMatrix = [ [(0,0,0)]*7 for i in range(19)]
+    fpMatrix = [ [(0,0,0)]*7 for i in range(19)]
+
+    #calc the diffs / fill the Floating Point Matrix
+    for x in range(0,19):
+        for y in range(0,7):
+            fromTupel = getPixel(x,y)
+            toTupel = toMatrix[x][y]
+            fpMatrix[x][y] = fromTupel
+            for colorRGB in range(0,3):
+                diff = ( fromTupel[colorRGB] - toTupel[colorRGB] ) / 256
+                diffMatrix[x][y][colorRGB] = diff
+
+     #do the fading
+     outTupel = [0,0,0]
+     for i in range(0,254):
+         for x in range(0,19):
+            for y in range(0,7):
+                for colorRGB in range(0,3):
+                    fpMatrix[x][y][colorRGB] += diffMatrix[x][y][colorRGB]
+                    outTupel[colorRGB] = math.trunc(fpMatrix[x][y][colorRGB])
+                    
+                setPixel(x,y,outTupel)
+         np.write()
+         time.sleep_us(stepDuration_us)
+
+    #finalize the transfer
+    putMatrix(toMatrix)
+    time.sleep_us(stepDuration_us)
+
+
+def fadeToblargh(toMatrix, step):
     outMatrix = [ [(0,0,0)]*7 for i in range(19)]
     fadeDone=True
     for x in range(0,19):
@@ -247,7 +280,10 @@ while True:
         else:
             lowerDot = bgcolor
             upperDot = bgcolor
+
+    fadeTo( plannedDisplay, 100)
             
+    #check if an NTP request is needed
     if time[5] != last_minute:
         last_minute = time[5]
 
@@ -259,21 +295,14 @@ while True:
             ntp_success = helper.getTime()
             ntp_counter=42
 
+    #Every 15 minutes do something fancy with colors 
     if time[6] == 0 and time[5] in [0,15,30,45]:
     #if time[6] == 0 and True:
         lowerDot = color
         upperDot = color
         plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
-        fadeTo( plannedDisplay, 256)
-        np.write()
 
         try:
             doCookoo(plannedDisplay, color, bgcolor)
         except:
             print("You messed up during cookoo")
-
-    fadeTo( plannedDisplay, 5)
-        
-    np.write()
-    
-    sleep_ms(delay_normal)
