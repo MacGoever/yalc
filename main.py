@@ -88,23 +88,23 @@ def fadeTo(toMatrix, duration):
                 diff = ( fromTupel[colorRGB] - toTupel[colorRGB] ) / 256
                 diffMatrix[x][y][colorRGB] = diff
 
-     #do the fading
-     outTupel = [0,0,0]
-     for i in range(0,254):
-         for x in range(0,19):
+    #do the fading
+    outTupel = [0,0,0]
+    for i in range(0,254):
+        for x in range(0,19):
             for y in range(0,7):
                 for colorRGB in range(0,3):
                     fpMatrix[x][y][colorRGB] += diffMatrix[x][y][colorRGB]
                     outTupel[colorRGB] = math.trunc(fpMatrix[x][y][colorRGB])
                     
                 setPixel(x,y,outTupel)
-         np.write()
-         time.sleep_us(stepDuration_us)
+        np.write()
+        time.sleep_us(stepDuration_us)
 
      #finalize the transfer
-     putMatrix(toMatrix)
-     np.write()
-     time.sleep_us(stepDuration_us)
+    putMatrix(toMatrix)
+    np.write()
+    time.sleep_us(stepDuration_us)
 
 
 def fadeToblargh(toMatrix, step):
