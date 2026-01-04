@@ -259,7 +259,7 @@ while True:
             ntp_success = helper.getTime()
             ntp_counter=42
 
-    if time[6] == 0 and time[5] in [0,5,30,45]:
+    if time[6] == 0 and time[5] in [0,15,30,45]:
     #if time[6] == 0 and True:
         lowerDot = color
         upperDot = color
