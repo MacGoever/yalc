@@ -101,9 +101,10 @@ def fadeTo(toMatrix, duration):
          np.write()
          time.sleep_us(stepDuration_us)
 
-    #finalize the transfer
-    putMatrix(toMatrix)
-    time.sleep_us(stepDuration_us)
+     #finalize the transfer
+     putMatrix(toMatrix)
+     np.write()
+     time.sleep_us(stepDuration_us)
 
 
 def fadeToblargh(toMatrix, step):
