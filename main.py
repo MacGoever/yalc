@@ -100,7 +100,7 @@ def fadeTo(toMatrix, duration):
                 outTupel = [0,0,0]
                 tempFp =  [0,0,0]       
                 for colorRGB in range(0,3):
-                    tempFp[colorRGB] = fpMatrix[x][y][colorRGB] + diffMatrix[x][y][colorRGB]
+                    tempFp[colorRGB] = fpMatrix[x][y][colorRGB] - diffMatrix[x][y][colorRGB]
                     outTupel[colorRGB] = math.trunc(tempFp[colorRGB])
                     
                 fpMatrix[x][y] = tuple(tempFp)
@@ -112,27 +112,6 @@ def fadeTo(toMatrix, duration):
     putMatrix(toMatrix)
     np.write()
     sleep_us(stepDuration_us)
-
-
-def fadeToblargh(toMatrix, step):
-    outMatrix = [ [(0,0,0)]*7 for i in range(19)]
-    fadeDone=True
-    for x in range(0,19):
-        outTupel = [0,0,0]
-        for y in range(0,7):
-            fromTupel = getPixel(x,y)
-            toTupel = toMatrix[x][y]
-            for colorRGB in range(0,3):
-                if ((fromTupel[colorRGB] + step) < toTupel[colorRGB]):
-                    outTupel[colorRGB] = fromTupel[colorRGB] + step
-                    fadeDone=False
-                elif ((fromTupel[colorRGB] - step) > toTupel[colorRGB]):
-                    outTupel[colorRGB] = fromTupel[colorRGB] - step
-                    fadeDone=False
-                else:
-                    outTupel[colorRGB] = toTupel[colorRGB]
-            setPixel(x,y,outTupel)
-    return fadeDone
 
 def putMatrix(fromMatrix):
     for x in range(0,19):
