@@ -2,6 +2,7 @@
 from machine import Pin
 from neopixel import NeoPixel
 from time import sleep_ms
+from time import sleep_us
 from collections import deque
 import machine
 import network
@@ -74,7 +75,7 @@ def setPixel (x,y,color):
         np[npIndex] = color
 
 def fadeTo(toMatrix, duration):
-    stepDuration_us = duration / 256 * 1000
+    stepDuration_us = round(duration / 256 * 1000)
     diffMatrix = [ [(0,0,0)]*7 for i in range(19)]
     fpMatrix = [ [(0,0,0)]*7 for i in range(19)]
 
@@ -84,27 +85,33 @@ def fadeTo(toMatrix, duration):
             fromTupel = getPixel(x,y)
             toTupel = toMatrix[x][y]
             fpMatrix[x][y] = fromTupel
+            tempDiff = [0,0,0]
+
             for colorRGB in range(0,3):
                 diff = ( fromTupel[colorRGB] - toTupel[colorRGB] ) / 256
-                diffMatrix[x][y][colorRGB] = diff
+                tempDiff[colorRGB] = diff
+                
+            diffMatrix[x][y] = tuple(tempDiff)
 
     #do the fading
-    outTupel = [0,0,0]
-    for i in range(0,254):
+    for i in range(0,255):
         for x in range(0,19):
             for y in range(0,7):
+                outTupel = [0,0,0]
+                tempFp =  [0,0,0]       
                 for colorRGB in range(0,3):
-                    fpMatrix[x][y][colorRGB] += diffMatrix[x][y][colorRGB]
-                    outTupel[colorRGB] = math.trunc(fpMatrix[x][y][colorRGB])
+                    tempFp[colorRGB] = fpMatrix[x][y][colorRGB] + diffMatrix[x][y][colorRGB]
+                    outTupel[colorRGB] = math.trunc(tempFp[colorRGB])
                     
-                setPixel(x,y,outTupel)
+                fpMatrix[x][y] = tuple(tempFp)
+                setPixel(x,y,tuple(outTupel))
         np.write()
-        time.sleep_us(stepDuration_us)
+        sleep_us(stepDuration_us)
 
-     #finalize the transfer
+    #finalize the transfer
     putMatrix(toMatrix)
     np.write()
-    time.sleep_us(stepDuration_us)
+    sleep_us(stepDuration_us)
 
 
 def fadeToblargh(toMatrix, step):
