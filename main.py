@@ -75,7 +75,8 @@ def setPixel (x,y,color):
         np[npIndex] = color
 
 def fadeTo(toMatrix, duration):
-    stepDuration_us = round(duration / 256 * 1000)
+    stepDuration_us = round(duration / 32 * 1000)
+
     diffMatrix = [ [(0,0,0)]*7 for i in range(19)]
     fpMatrix = [ [(0,0,0)]*7 for i in range(19)]
 
@@ -88,13 +89,13 @@ def fadeTo(toMatrix, duration):
             tempDiff = [0,0,0]
 
             for colorRGB in range(0,3):
-                diff = ( fromTupel[colorRGB] - toTupel[colorRGB] ) / 256
+                diff = ( fromTupel[colorRGB] - toTupel[colorRGB] ) / 32
                 tempDiff[colorRGB] = diff
                 
             diffMatrix[x][y] = tuple(tempDiff)
 
     #do the fading
-    for i in range(0,255):
+    for i in range(0,31):
         for x in range(0,19):
             for y in range(0,7):
                 outTupel = [0,0,0]
@@ -107,6 +108,7 @@ def fadeTo(toMatrix, duration):
                 setPixel(x,y,tuple(outTupel))
         np.write()
         sleep_us(stepDuration_us)
+
 
     #finalize the transfer
     putMatrix(toMatrix)
@@ -238,6 +240,7 @@ last_sec = 0
 while True:
     #set time
     time = machine.RTC().datetime()
+    print(time)
     hours = time[4] % 10
     hoursPoTen = time[4] // 10
     minutes = time[5] % 10
@@ -268,7 +271,7 @@ while True:
             lowerDot = bgcolor
             upperDot = bgcolor
 
-    fadeTo( plannedDisplay, 100)
+    fadeTo( plannedDisplay, 10)
             
     #check if an NTP request is needed
     if time[5] != last_minute:
