@@ -89,7 +89,7 @@ def fadeTo(toMatrix, duration):
             tempDiff = [0,0,0]
 
             for colorRGB in range(0,3):
-                diff = ( fromTupel[colorRGB] - toTupel[colorRGB] ) / 32
+                diff = math.trunc(( fromTupel[colorRGB] - toTupel[colorRGB] ) / 32 )
                 tempDiff[colorRGB] = diff
                 
             diffMatrix[x][y] = tuple(tempDiff)
@@ -98,14 +98,15 @@ def fadeTo(toMatrix, duration):
     for i in range(0,31):
         for x in range(0,19):
             for y in range(0,7):
-                outTupel = [0,0,0]
+                #outTupel = [0,0,0]
                 tempFp =  [0,0,0]       
                 for colorRGB in range(0,3):
                     tempFp[colorRGB] = fpMatrix[x][y][colorRGB] - diffMatrix[x][y][colorRGB]
-                    outTupel[colorRGB] = math.trunc(tempFp[colorRGB])
+                    #outTupel[colorRGB] = tempFp[colorRGB]
                     
                 fpMatrix[x][y] = tuple(tempFp)
-                setPixel(x,y,tuple(outTupel))
+                #setPixel(x,y,tuple(outTupel))
+        putMatrix(fpMatrix)        
         np.write()
         sleep_us(stepDuration_us)
 
@@ -240,7 +241,7 @@ last_sec = 0
 while True:
     #set time
     time = machine.RTC().datetime()
-    print(time)
+    #print(time)
     hours = time[4] % 10
     hoursPoTen = time[4] // 10
     minutes = time[5] % 10
