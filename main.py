@@ -254,11 +254,11 @@ while True:
         color=(0,255,0)    
     
     #generate time display
-    helper.setNumber(0 ,hoursPoTen, color, bgcolor, timeDisplay)
-    helper.setNumber(1 ,hours, color, bgcolor,timeDisplay)
-    helper.setNumber(2 ,minutesPoTen, color, bgcolor,timeDisplay)
-    helper.setNumber(3 ,minutes, color, bgcolor,timeDisplay)
-    helper.setColon(upperDot , lowerDot,timeDisplay)
+    timeDisplay = helper.setNumber(0 ,hoursPoTen, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setNumber(1 ,hours, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setNumber(2 ,minutesPoTen, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setNumber(3 ,minutes, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setColon(upperDot, lowerDot, timeDisplay)
        
     if timeTupel[6] != last_sec:
         last_sec = timeTupel[6]
@@ -291,9 +291,9 @@ while True:
         upperDot = color
         helper.setColon(upperDot , lowerDot,timeDisplay)
 
-        doCookoo(timeDisplay, color, bgcolor)
+        #doCookoo(timeDisplay, color, bgcolor)
 
-        #try:
-        #    doCookoo(timeDisplay, color, bgcolor)
-        #except:
-        #    print("You messed up during cookoo")
+        try:
+            doCookoo(timeDisplay, color, bgcolor)
+        except:
+            print("You messed up during cookoo")

@@ -333,6 +333,10 @@ def setNumber(numberIndex, number, numberRGB, backRGB, buf):
     for k in ledsBackground :
         setLED (buf,k,numberRGB)
         
+    return buf
+        
 def setColon(upperRGB, lowerRGB, buf):
     setPixel (buf,9,1,upperRGB)
     setPixel (buf,9,5,lowerRGB)
+    return buf
+    
