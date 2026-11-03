@@ -122,8 +122,10 @@ def getTime():
             s.close()
 
     return ntp_success
-             
-pixelmap = [ [-1]*7 for i in range(19)]
+
+
+
+pixelmap = [ [None]*7 for i in range(19)]
 pixelmap[0][0] = 73
 pixelmap[0][1] = 72
 pixelmap[0][2] = 71
@@ -210,7 +212,26 @@ pixelmap[13][6] = 21
 pixelmap[16][6] = 22
 pixelmap[17][6] = 23
 
-def setNumber(numberIndex, number, numberRGB, backRGB):
+def getPixel(buf,x,y):
+    ledIndex = pixelmap[x][y]
+    if ledIndex is None:
+        return None
+    else:
+        ledIndex=ledIndex*3
+        return (buf[ledIndex+1],buf[ledIndex],buf[ledIndex+2])  #Return GRB value as RGB
+
+def setPixel (buf,x,y,color):
+    npIndex = pixelmap[x][y]
+    setLED (buf,npIndex,color)
+    
+def setLED (buf,npIndex,color):    
+    if npIndex is not None:
+        ledIndex=npIndex*3
+        buf[ledIndex] = color[1]
+        buf[ledIndex+1] = color[0]
+        buf[ledIndex+2] = color[2]
+
+def setNumber(numberIndex, number, numberRGB, backRGB, buf):
     ledsNumber = []
     ledsBackground = []
     if numberIndex == 0:
@@ -307,173 +328,11 @@ def setNumber(numberIndex, number, numberRGB, backRGB):
 
   
     for k in ledsBackground :
-        np[k] = backRGB
+        setLED (buf,k,backRGB)
+
+    for k in ledsBackground :
+        setLED (buf,k,numberRGB)
         
-    for k in ledsNumber :
-        np[k] = numberRGB
-        
-def setNumberInMatrix(outputMatrix, numberIndex, number, numberRGB, backRGB):
-    xStart = 0
-    if numberIndex == 1:
-        xStart = 4
-    if numberIndex == 2:
-        xStart = 11
-    if numberIndex == 3:
-        xStart = 15
-
-    for x in range(0,4):
-        for y in range(0,7):
-            outputMatrix[x + xStart][y] = backRGB
-    
-    if number == 0:
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[0 + xStart][0] = numberRGB
-        outputMatrix[0 + xStart][1] = numberRGB
-        outputMatrix[0 + xStart][2] = numberRGB
-        outputMatrix[0 + xStart][4] = numberRGB
-        outputMatrix[0 + xStart][5] = numberRGB
-        outputMatrix[0 + xStart][6] = numberRGB
-    if number == 1:
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-    if number == 2:
-        outputMatrix[0 + xStart][0] = numberRGB
-        outputMatrix[0 + xStart][1] = numberRGB
-        outputMatrix[0 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-    if number == 3:
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-    if number == 4:
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[0 + xStart][4] = numberRGB
-        outputMatrix[0 + xStart][5] = numberRGB
-        outputMatrix[0 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-    if number == 5:
-        outputMatrix[0 + xStart][4] = numberRGB
-        outputMatrix[0 + xStart][5] = numberRGB
-        outputMatrix[0 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-    if number == 6:
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[0 + xStart][0] = numberRGB
-        outputMatrix[0 + xStart][1] = numberRGB
-        outputMatrix[0 + xStart][2] = numberRGB
-        outputMatrix[0 + xStart][4] = numberRGB
-        outputMatrix[0 + xStart][5] = numberRGB
-        outputMatrix[0 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-    if number == 7:
-        ledsNumber = [16,17,62,63,64,65,66,67]
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-    if number == 8:
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[0 + xStart][0] = numberRGB
-        outputMatrix[0 + xStart][1] = numberRGB
-        outputMatrix[0 + xStart][2] = numberRGB
-        outputMatrix[0 + xStart][4] = numberRGB
-        outputMatrix[0 + xStart][5] = numberRGB
-        outputMatrix[0 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-    if number == 9:
-        outputMatrix[1 + xStart][0] = numberRGB
-        outputMatrix[2 + xStart][0] = numberRGB
-        outputMatrix[1 + xStart][6] = numberRGB
-        outputMatrix[2 + xStart][6] = numberRGB
-        outputMatrix[3 + xStart][1] = numberRGB
-        outputMatrix[3 + xStart][0] = numberRGB
-        outputMatrix[3 + xStart][2] = numberRGB
-        outputMatrix[3 + xStart][4] = numberRGB
-        outputMatrix[3 + xStart][5] = numberRGB
-        outputMatrix[3 + xStart][6] = numberRGB
-        outputMatrix[0 + xStart][4] = numberRGB
-        outputMatrix[0 + xStart][5] = numberRGB
-        outputMatrix[0 + xStart][6] = numberRGB
-        outputMatrix[1 + xStart][3] = numberRGB
-        outputMatrix[2 + xStart][3] = numberRGB
-        
-    return outputMatrix
-
-def setColonInMatrix(outputMatrix, upperRGB, lowerRGB):
-        outputMatrix[9][1] = upperRGB
-        outputMatrix[9][5] = lowerRGB      
-        return outputMatrix
-
-
-def setColon(upperRGB, lowerRGB):
-    np[48] = upperRGB
-    np[49] = lowerRGB
-
-
-               
-    
+def setColon(upperRGB, lowerRGB, buf):
+    setPixel (buf,9,1,upperRGB)
+    setPixel (buf,9,5,lowerRGB)

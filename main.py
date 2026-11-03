@@ -3,7 +3,6 @@ from machine import Pin
 from neopixel import NeoPixel
 from time import sleep_ms
 from time import sleep_us
-from collections import deque
 import machine
 import network
 import sys
@@ -12,7 +11,10 @@ import usocket as socket
 import ustruct as struct
 import random
 import math
+from helper import getPixel
+from helper import setPixel
 import helper
+
 from WIFI_CONFIG import SSID, PASSWORD
 from ota import OTAUpdater
 
@@ -30,6 +32,9 @@ leds = 74
 delay_normal = 10
 
 np = NeoPixel(Pin(pin_np, Pin.OUT), leds)
+currentDisplay = np.buf
+timeDisplay = [0] * leds * 3
+
 np.fill(red)
 np.write()
 sleep_ms(500)
@@ -46,17 +51,16 @@ np.fill(bgcolor)
 np.write()
 
 #get time and Wifi
-helper.getWifi()
+#helper.getWifi()
 
 firmware_url = "https://github.com/MacGoever/yalc/refs/heads/main/"
 ota_updater = OTAUpdater(firmware_url, "main.py", "helper.py")
-ota_updater.download_and_install_update_if_available()
+#ota_updater.download_and_install_update_if_available()
 
 cookooDone = False
-tempint = 0
 
-currentDisplay = [ [(0,0,0)]*7 for i in range(19)]
-plannedDisplay = [ [(0,0,0)]*7 for i in range(19)]
+#currentDisplay = [ [(0,0,0)]*7 for i in range(19)]
+#timeDisplay = [ [(0,0,0)]*7 for i in range(19)]
 
 
 upperDot = green
@@ -65,84 +69,78 @@ dotDelay = 1000
 dotCount = 0
 
 
-def getPixel(x,y):
-    ledIndex = helper.pixelmap[x][y]
-    return np[ledIndex]
 
-def setPixel (x,y,color):
-    npIndex = helper.pixelmap[x][y]
-    if npIndex != -1:
-        np[npIndex] = color
 
-def fadeTo(toMatrix, duration):
-    stepDuration_us = round(duration / 32 * 1000)
+def fadeTo(buf, duration):
+    global currentDisplay
+    stepDuration_us = 15*1000
+    numberOfSteps = math.trunc(duration / stepDuration_us * 1000)
+    if not numberOfSteps:
+        numberofSteps = 1
 
-    diffMatrix = [ [(0,0,0)]*7 for i in range(19)]
-    fpMatrix = [ [(0,0,0)]*7 for i in range(19)]
+    diffMatrix = [0] * leds * 3
+    tempMatrix = [0] * leds * 3
 
-    #calc the diffs / fill the Floating Point Matrix
-    for x in range(0,19):
-        for y in range(0,7):
-            fromTupel = getPixel(x,y)
-            toTupel = toMatrix[x][y]
-            fpMatrix[x][y] = fromTupel
-            tempDiff = [0,0,0]
-
-            for colorRGB in range(0,3):
-                diff = math.trunc(( fromTupel[colorRGB] - toTupel[colorRGB] ) / 32 )
-                tempDiff[colorRGB] = diff
-                
-            diffMatrix[x][y] = tuple(tempDiff)
+    preFillTime=time.ticks_us()
+    #calc the diffs 
+    for index, (current, planned) in enumerate(zip(currentDisplay,buf)):
+        #diffMatrix[index] = math.trunc((current - planned) / numberOfSteps)
+        diffMatrix[index] = (current - planned) / numberOfSteps
+        tempMatrix[index] = current
+    
+    fillTime=time.ticks_diff(time.ticks_us(),preFillTime)
 
     #do the fading
-    for i in range(0,31):
-        for x in range(0,19):
-            for y in range(0,7):
-                #outTupel = [0,0,0]
-                tempFp =  [0,0,0]       
-                for colorRGB in range(0,3):
-                    tempFp[colorRGB] = fpMatrix[x][y][colorRGB] - diffMatrix[x][y][colorRGB]
-                    #outTupel[colorRGB] = tempFp[colorRGB]
-                    
-                fpMatrix[x][y] = tuple(tempFp)
-                #setPixel(x,y,tuple(outTupel))
-        putMatrix(fpMatrix)        
+    
+    for i in range(0,numberOfSteps-1):
+        preStepTime=time.ticks_us()
+        for index, diff in enumerate(diffMatrix):
+            #currentDisplay[index] = currentDisplay[index] + diff
+            currentDisplay[index] = tempMatrix[index] + round(diff * i)
+                
         np.write()
-        sleep_us(stepDuration_us)
+        
+        stepTime=time.ticks_diff(time.ticks_us(),preStepTime)
 
+        if (stepTime + fillTime) < stepDuration_us:
+            
+            sleep_us(stepDuration_us - stepTime - fillTime)
+            
+        fillTime=0
 
     #finalize the transfer
-    putMatrix(toMatrix)
+    preStepTime=time.ticks_us()
+    for index, finalValue in enumerate(buf):
+        currentDisplay[index] = finalValue
+                
     np.write()
-    sleep_us(stepDuration_us)
+        
+    stepTime=time.ticks_diff(time.ticks_us(),preStepTime)
 
-def putMatrix(fromMatrix):
-    for x in range(0,19):
-        for y in range(0,7):
-            setPixel(x,y,fromMatrix[x][y]) 
-
+    sleep_us(stepDuration_us - stepTime)
+           
 ##################################################
 #Cookoos
 ##################################################
 #color fade digits
-def cookoo5(plannedDisplay, ocolor, bgcoler):
+def cookoo5(timeDisplay, ocolor, bgcoler):
     
     colors=[(255,0,0),(255,255,0),(255,255,255),(255,255,0),(0,255,0),(0,0,255),(0,255,255),(255,0,0),(255,255,0),(255,255,255),(255,255,0),(0,255,0),(0,0,255),(255,0,0),(255,255,0),(255,255,255),(255,255,0),(0,255,0),(0,0,255),(0,255,255)]
     
     for k in range(20):
         cookoo2Color = colors[k]
-        plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 0 ,hoursPoTen, cookoo2Color, bgcolor)
+        timeDisplay = helper.setNumberInMatrix(timeDisplay, 0 ,hoursPoTen, cookoo2Color, bgcolor)
         cookoo2Color = colors[(k + 3) % 20]
-        plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 1 ,hours, cookoo2Color, bgcolor)
+        timeDisplay = helper.setNumberInMatrix(timeDisplay, 1 ,hours, cookoo2Color, bgcolor)
         cookoo2Color = colors[(k + 7) % 20]
-        plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 2 ,minutesPoTen, cookoo2Color, bgcolor)
+        timeDisplay = helper.setNumberInMatrix(timeDisplay, 2 ,minutesPoTen, cookoo2Color, bgcolor)
         cookoo2Color = colors[(k + 11) % 20]
-        plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 3 ,minutes, cookoo2Color, bgcolor)
+        timeDisplay = helper.setNumberInMatrix(timeDisplay, 3 ,minutes, cookoo2Color, bgcolor)
         cookoo2Color = colors[(k + 15) % 20]
-        plannedDisplay = helper.setColonInMatrix(plannedDisplay, cookoo2Color, cookoo2Color)
+        timeDisplay = helper.setColonInMatrix(timeDisplay, cookoo2Color, cookoo2Color)
             
         for j in range(255 / 20):       
-            #currentDisplay = fadeTo(currentDisplay, plannedDisplay, 20)
+            #currentDisplay = fadeTo(currentDisplay, timeDisplay, 20)
                      
             for x in range(0,19):
                 for y in range(0,7):
@@ -153,7 +151,7 @@ def cookoo5(plannedDisplay, ocolor, bgcoler):
             sleep_ms(delay_normal)
 
 #color flip numbers
-def cookoo3(plannedDisplay, ocolor, bgcoler):
+def cookoo3(timeDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0)]
 
     for k in range (0,15):
@@ -161,71 +159,71 @@ def cookoo3(plannedDisplay, ocolor, bgcoler):
         colors.append(colors.pop(0))
         for i in range (0,5):
             for j in range (0,7):
-                if getPixel(i,j) != bgcolor:
-                    setPixel (i, j, color)
+                if getPixel(currentDisplay,i,j) != bgcolor:
+                    setPixel(currentDisplay,i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
         for i in range (4,9):
             for j in range (0,7):
-                if getPixel(i,j) != bgcolor:
-                    setPixel (i, j, color)
+                if getPixel(currentDisplay,i,j) != bgcolor:
+                    setPixel(currentDisplay,i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
         for i in range (9,11):
             for j in range (0,7):
-                if getPixel(i,j) != bgcolor:
-                    setPixel (i, j, color)
+                if getPixel(currentDisplay,i,j) != bgcolor:
+                    setPixel(currentDisplay,i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
         for i in range (11,16):
             for j in range (0,7):
-                if getPixel(i,j) != bgcolor:
-                    setPixel (i, j, color)
+                if getPixel(currentDisplay,i,j) != bgcolor:
+                    setPixel(currentDisplay,i, j, color)
         color = colors[0]
         colors.append(colors.pop(0))
         for i in range (15,19):
             for j in range (0,7):
-                if getPixel(i,j) != bgcolor:
-                    setPixel (i, j, color)
+                if getPixel(currentDisplay,i,j) != bgcolor:
+                    setPixel(currentDisplay,i, j, color)
         np.write()
         sleep_ms(300)
                     
 #color from bottom to top
-def cookoo2(plannedDisplay, ocolor, bgcoler):
+def cookoo2(timeDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0),(255,255,255),ocolor]
     for k in range (0,5):
         for color in colors:
             for j in range (0,7):
                 for i in range (0,19):
-                    if getPixel(i,j) != bgcolor:
-                        setPixel (i, j, color)
+                    if getPixel(currentDisplay,i,j) != bgcolor:
+                        setPixel(currentDisplay,i, j, color)
                 np.write()
                 sleep_ms(20)       
 
 #color from left to right
-def cookoo1(plannedDisplay, ocolor, bgcoler):
+def cookoo1(timeDisplay, ocolor, bgcoler):
     colors = [(0,255,255),(0,0,255),(255,0,255),(255,255,0),(255,0,0),(0,255,0),(255,255,255),ocolor]
 
     for k in range (0,5):
         for color in colors:
             for i in range (0,19):
                 for j in range (0,7):
-                    if getPixel(i,j) != bgcolor:
-                        setPixel (i, j, color)
+                    if getPixel(currentDisplay, i,j) != bgcolor:
+                        setPixel(currentDisplay, i, j, color)
                 np.write()
                 sleep_ms(20)
                     
 
         
 #escaping digits
-def cookoo4(plannedDisplay, ocolor, bgcoler):
+def cookoo4(timeDisplay, ocolor, bgcoler):
     print("Test")
     
             
 cookoos = [cookoo1,cookoo2,cookoo3]
 
-def doCookoo(plannedDisplay, color, bgcoler):
-    cookoos[0](plannedDisplay, color, bgcoler)
+def doCookoo(timeDisplay, color, bgcoler):
+    cookoos[0](timeDisplay, color, bgcoler)
     cookoos.append(cookoos.pop(0))
     
 ##################################################
@@ -240,30 +238,30 @@ last_sec = 0
 
 while True:
     #set time
-    time = machine.RTC().datetime()
+    timeTupel = machine.RTC().datetime()
     #print(time)
-    hours = time[4] % 10
-    hoursPoTen = time[4] // 10
-    minutes = time[5] % 10
-    minutesPoTen = time[5] // 10
+    hours = timeTupel[4] % 10
+    hoursPoTen = timeTupel[4] // 10
+    minutes = timeTupel[5] % 10
+    minutesPoTen = timeTupel[5] // 10
     
     #choose color depending on daytime
-    if time[4] > 18 or time[4] < 5:
+    if timeTupel[4] > 18 or timeTupel[4] < 5:
         color=(200,0,0)
-    if time[4] > 5 and time[4] < 10:
+    if timeTupel[4] > 5 and timeTupel[4] < 10:
         color=(0,0,255)
-    if time[4] > 10 and time[4] < 18:
+    if timeTupel[4] > 10 and timeTupel[4] < 18:
         color=(0,255,0)    
     
     #generate time display
-    plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 0 ,hoursPoTen, color, bgcolor)
-    plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 1 ,hours, color, bgcolor)
-    plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 2 ,minutesPoTen, color, bgcolor)
-    plannedDisplay = helper.setNumberInMatrix(plannedDisplay, 3 ,minutes, color, bgcolor)
-    plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
+    helper.setNumber(0 ,hoursPoTen, color, bgcolor, timeDisplay)
+    helper.setNumber(1 ,hours, color, bgcolor,timeDisplay)
+    helper.setNumber(2 ,minutesPoTen, color, bgcolor,timeDisplay)
+    helper.setNumber(3 ,minutes, color, bgcolor,timeDisplay)
+    helper.setColon(upperDot , lowerDot,timeDisplay)
        
-    if time[6] != last_sec:
-        last_sec = time[6]
+    if timeTupel[6] != last_sec:
+        last_sec = timeTupel[6]
         
         if last_sec % 2 == 0:
             lowerDot = color
@@ -272,11 +270,11 @@ while True:
             lowerDot = bgcolor
             upperDot = bgcolor
 
-    fadeTo( plannedDisplay, 10)
+    fadeTo( timeDisplay, 950)
             
     #check if an NTP request is needed
-    if time[5] != last_minute:
-        last_minute = time[5]
+    if timeTupel[5] != last_minute:
+        last_minute = timeTupel[5]
 
         ntp_counter += -1
         if not ntp_success:
@@ -287,13 +285,15 @@ while True:
             ntp_counter=42
 
     #Every 15 minutes do something fancy with colors 
-    if time[6] == 0 and time[5] in [0,15,30,45]:
+    if timeTupel[6] == 0: #and timeTupel[5] in [0,15,30,45]:
     #if time[6] == 0 and True:
         lowerDot = color
         upperDot = color
-        plannedDisplay = helper.setColonInMatrix(plannedDisplay, upperDot , lowerDot)
+        helper.setColon(upperDot , lowerDot,timeDisplay)
 
-        try:
-            doCookoo(plannedDisplay, color, bgcolor)
-        except:
-            print("You messed up during cookoo")
+        doCookoo(timeDisplay, color, bgcolor)
+
+        #try:
+        #    doCookoo(timeDisplay, color, bgcolor)
+        #except:
+        #    print("You messed up during cookoo")
