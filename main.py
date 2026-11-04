@@ -51,24 +51,13 @@ np.fill(bgcolor)
 np.write()
 
 #get time and Wifi
-#helper.getWifi()
+helper.getWifi()
 
 firmware_url = "https://github.com/MacGoever/yalc/refs/heads/main/"
 ota_updater = OTAUpdater(firmware_url, "main.py", "helper.py")
-#ota_updater.download_and_install_update_if_available()
+ota_updater.download_and_install_update_if_available()
 
 cookooDone = False
-
-#currentDisplay = [ [(0,0,0)]*7 for i in range(19)]
-#timeDisplay = [ [(0,0,0)]*7 for i in range(19)]
-
-
-upperDot = green
-lowerDot = red
-dotDelay = 1000
-dotCount = 0
-
-
 
 
 def fadeTo(buf, duration):
@@ -239,7 +228,6 @@ last_sec = 0
 while True:
     #set time
     timeTupel = machine.RTC().datetime()
-    #print(time)
     hours = timeTupel[4] % 10
     hoursPoTen = timeTupel[4] // 10
     minutes = timeTupel[5] % 10
@@ -270,7 +258,7 @@ while True:
             lowerDot = bgcolor
             upperDot = bgcolor
 
-    fadeTo( timeDisplay, 950)
+    fadeTo( timeDisplay, 200)
             
     #check if an NTP request is needed
     if timeTupel[5] != last_minute:
@@ -285,13 +273,10 @@ while True:
             ntp_counter=42
 
     #Every 15 minutes do something fancy with colors 
-    if timeTupel[6] == 0: #and timeTupel[5] in [0,15,30,45]:
-    #if time[6] == 0 and True:
+    if timeTupel[6] == 0 and timeTupel[5] in [0,15,30,45]:
         lowerDot = color
         upperDot = color
         helper.setColon(upperDot , lowerDot,timeDisplay)
-
-        #doCookoo(timeDisplay, color, bgcolor)
 
         try:
             doCookoo(timeDisplay, color, bgcolor)
