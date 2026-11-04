@@ -330,7 +330,7 @@ def setNumber(numberIndex, number, numberRGB, backRGB, buf):
     for k in ledsBackground :
         setLED (buf,k,backRGB)
 
-    for k in ledsBackground :
+    for k in ledsNumber :
         setLED (buf,k,numberRGB)
         
     return buf
