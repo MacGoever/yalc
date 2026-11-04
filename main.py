@@ -78,15 +78,15 @@ def fadeTo(buf, duration):
         tempMatrix[index] = current
     
     fillTime=time.ticks_diff(time.ticks_us(),preFillTime)
-
-    #do the fading
     
+    #do the fading
     for i in range(0,numberOfSteps-1):
         preStepTime=time.ticks_us()
         for index, diff in enumerate(diffMatrix):
-            #currentDisplay[index] = currentDisplay[index] + diff
-            currentDisplay[index] = tempMatrix[index] + round(diff * i)
-                
+            currentDisplay[index] = tempMatrix[index] - round(diff * i)
+            if diff:
+                print(currentDisplay[index])
+                                
         np.write()
         
         stepTime=time.ticks_diff(time.ticks_us(),preStepTime)
@@ -96,7 +96,8 @@ def fadeTo(buf, duration):
             sleep_us(stepDuration_us - stepTime - fillTime)
             
         fillTime=0
-
+    
+    
     #finalize the transfer
     preStepTime=time.ticks_us()
     for index, finalValue in enumerate(buf):
@@ -258,8 +259,9 @@ while True:
     timeDisplay = helper.setNumber(2 ,minutesPoTen, color, bgcolor, timeDisplay)
     timeDisplay = helper.setNumber(3 ,minutes, color, bgcolor, timeDisplay)
     timeDisplay = helper.setColon(upperDot, lowerDot, timeDisplay)
-
-    fadeTo( timeDisplay, 200)
+    
+    print(upperDot)
+    fadeTo( timeDisplay, 500)
             
     #check if an NTP request is needed
     if timeTupel[5] != last_minute:
@@ -277,7 +279,7 @@ while True:
     if timeTupel[6] == 0 and timeTupel[5] in [0,15,30,45]:
         lowerDot = color
         upperDot = color
-        helper.setColon(upperDot , lowerDot,timeDisplay)
+        timeDisplay = helper.setColon(upperDot, lowerDot,timeDisplay)
 
         try:
             doCookoo(timeDisplay, color, bgcolor)
