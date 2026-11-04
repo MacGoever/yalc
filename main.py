@@ -240,14 +240,8 @@ while True:
         color=(0,0,255)
     if timeTupel[4] > 10 and timeTupel[4] < 18:
         color=(0,255,0)    
-    
-    #generate time display
-    timeDisplay = helper.setNumber(0 ,hoursPoTen, color, bgcolor, timeDisplay)
-    timeDisplay = helper.setNumber(1 ,hours, color, bgcolor, timeDisplay)
-    timeDisplay = helper.setNumber(2 ,minutesPoTen, color, bgcolor, timeDisplay)
-    timeDisplay = helper.setNumber(3 ,minutes, color, bgcolor, timeDisplay)
-    timeDisplay = helper.setColon(upperDot, lowerDot, timeDisplay)
-       
+
+    #set Colon blink state    
     if timeTupel[6] != last_sec:
         last_sec = timeTupel[6]
         
@@ -257,6 +251,13 @@ while True:
         else:
             lowerDot = bgcolor
             upperDot = bgcolor
+            
+    #generate time display
+    timeDisplay = helper.setNumber(0 ,hoursPoTen, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setNumber(1 ,hours, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setNumber(2 ,minutesPoTen, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setNumber(3 ,minutes, color, bgcolor, timeDisplay)
+    timeDisplay = helper.setColon(upperDot, lowerDot, timeDisplay)
 
     fadeTo( timeDisplay, 200)
             
